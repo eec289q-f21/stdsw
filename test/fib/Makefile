@@ -1,4 +1,4 @@
-CC := /home/rra/OpenCilk-10.0.1-Linux/bin/clang
+CC := clang
 CFLAGS := -Wall -O3 -g -gdwarf-3 -fopencilk
 LDFLAGS := -fopencilk -ldl
 
