@@ -60,6 +60,8 @@ function install_dev {
         cmake \
         gdb \
         jq \
+        npm \
+        nodejs \
         awscli \
         valgrind \
         gcovr \
@@ -84,6 +86,8 @@ function install_dev {
 	pip3 install stdeb==0.9.1
 	
 	pip3 install opentuner==0.8.3
+	
+	npm install -g privnote-cli
 }
 
 if [[ $(lsb_release -rs) == "20.04" ]]; then
