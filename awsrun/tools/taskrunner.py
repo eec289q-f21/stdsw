@@ -4,10 +4,11 @@ import argparse
 from os import path
 import sys
 
-from common.resources import JsonLoader
+
 
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
+from common.resources import JsonLoader
 from common.configuration import AWSPathManager, AWSInfra
 from taskmgmt.runnable import IOTaskRunner
 
