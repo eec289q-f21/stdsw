@@ -388,10 +388,10 @@ class EC2Launcher:
                 if tmp_ver > chosen_image[1]:
                     chosen_image = (image, tmp_ver)
 
-            if chosen_image[1] == -1:
-                raise KeyError('AMI with name "' + template_name + '" not found')
-            else:
-                return chosen_image
+        if chosen_image[1] == -1:
+            raise KeyError('AMI with name "' + template_name + '" not found')
+        else:
+            return chosen_image
 
     def tag_instance(self, inst_id, *tags: tuple):
         assert all(map(lambda t: len(t) == 2, tags)), "all pairs should key/value pairs"

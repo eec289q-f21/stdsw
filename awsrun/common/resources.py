@@ -87,7 +87,7 @@ class Folder(OSPath):
 
     # figures out the relative path of this against path p.
     def relative(self, p: OSPath):
-        return Path(os.path.normpath(os.path.relpath(p.path, self.path)))
+        return Path(os.path.realpath(os.path.normpath(os.path.relpath(p.path, self.path))))
 
     @dispatch(File)
     def join(self, p: File):
