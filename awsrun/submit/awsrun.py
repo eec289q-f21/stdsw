@@ -3,10 +3,11 @@ import argparse
 from os import path
 import sys
 
-from common.resources import JsonLoader
+
 
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
+from common.resources import JsonLoader
 from common.configuration import CmdConfig, WSConfig, AWSPathManager, AWSInfra
 from common.protocol import IOTask
 from submit.tasks import AWSIssuer
