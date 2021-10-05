@@ -52,12 +52,6 @@ if __name__ == '__main__':
                         const='config.aws',
                         help='configuration file for the aws server')
 
-    # task config
-    aws_parser.add_argument('--cmd',
-                            type=str,
-                            required=True,
-                            help='command to run (executable with arguments)')
-
     aws_parser.add_argument('--deps',
                             type=str,
                             default="deps.aws",
@@ -89,6 +83,12 @@ if __name__ == '__main__':
                             default="submission",
                             help='prefix for job folders')
 
+    # task config
+    aws_parser.add_argument('--cmd',
+                            nargs='+',
+                            required=True,
+                            help='command to run (executable with arguments)')
+
     args = aws_parser.parse_args()
 
     if args.configurl:
@@ -99,7 +99,7 @@ if __name__ == '__main__':
 
     aws_path_manager = AWSPathManager(AWSInfra.load(data))
 
-    cmd_config = CmdConfig.new(cmd=args.cmd.split(),
+    cmd_config = CmdConfig.new(cmd=args.cmd,
                                timeout=args.timeout,
                                cores=args.core,
                                depfile=args.deps)

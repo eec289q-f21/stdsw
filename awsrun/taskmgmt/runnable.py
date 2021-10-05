@@ -5,7 +5,9 @@ import os
 import signal
 import subprocess
 import tarfile
+import time
 from abc import ABC, abstractmethod
+from contextlib import closing
 
 import objectfactory
 
@@ -54,6 +56,7 @@ class RunnableTask(ABC):
 
 class StdTask(RunnableTask):
     def __init__(self, task: IOTask, serverpath, bucketpath):
+        task.command.relativize()
         self._taskcfg = task
         self._serverpath = serverpath
         self._bucketpath = bucketpath
@@ -78,21 +81,14 @@ class StdTask(RunnableTask):
         self._output.remove()
         self._mountdir.remove()
 
-    @staticmethod
-    def encode(str):
-        data = str.encode('utf-8')
-        io_bytes = io.BytesIO(data)
-        io_bytes.seek(0)
-        return io_bytes
-
     def write_output(self, file_name, str_data):
         try:
-            with tarfile.open(self._output.path, "w") as tarball:
-                io_bytes = StdTask.encode(str_data)
-                tf_info = tarfile.TarInfo(file_name)
-                tf_info.size = len(str_data)
-                tarball.addfile(tarinfo=tf_info, fileobj=io_bytes)
-                tarball.close()
+            with tarfile.open(self._output.path, "a") as tarball:
+                with closing(io.BytesIO(str_data.encode())) as fobj:
+                    tf_info = tarfile.TarInfo(file_name)
+                    tf_info.size = len(fobj.getvalue())
+                    tf_info.mtime = time.time()
+                    tarball.addfile(tf_info, fileobj=fobj)
         except Exception as e:
             self._logger.exception("exception %s", e)
             raise TerminateTask()
@@ -111,12 +107,12 @@ class StdTask(RunnableTask):
 
         return cmd
 
-    def onStdout(self, string):
-        self.write_output("stdout", string)
+    def onStdout(self, out_str):
+        self.write_output("stdout", out_str)
         return self._output
 
-    def onStderr(self, string):
-        self.write_output("stderr", string)
+    def onStderr(self, out_str):
+        self.write_output("stderr", out_str)
         return self._output
 
     def onFinished(self, returncode):

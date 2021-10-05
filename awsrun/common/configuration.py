@@ -361,6 +361,12 @@ class CmdConfig(objectfactory.Serializable):
     def cores(self):
         return self._cores
 
+    def relativize(self):
+        for i in range(len(self.shell)):
+            cmd_arg = self.shell[i]
+            if os.path.exists(cmd_arg):
+                self.shell[i] = "." + cmd_arg
+
     @property
     def deps(self):
         try:
