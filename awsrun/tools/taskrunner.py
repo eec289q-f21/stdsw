@@ -43,3 +43,5 @@ if __name__ == '__main__':
     aws_path_manager = AWSPathManager(AWSInfra.load(data))
 
     IOTaskRunner(args.task, aws_path_manager).run()
+
+    print("\nsuccess\n")
