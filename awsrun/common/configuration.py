@@ -364,7 +364,7 @@ class CmdConfig(objectfactory.Serializable):
     def relativize(self):
         for i in range(len(self.shell)):
             cmd_arg = self.shell[i]
-            if cmd_arg.starts(os.path.sep):
+            if cmd_arg.startswith(os.path.sep):
                 self.shell[i] = "." + cmd_arg
 
     @property
