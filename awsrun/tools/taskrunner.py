@@ -9,8 +9,6 @@ from common.resources import JsonLoader
 from common.configuration import AWSPathManager, AWSInfra
 from taskmgmt.runnable import IOTaskRunner
 
-
-
 if __name__ == '__main__':
     aws_parser = argparse.ArgumentParser(description='Uploads your files to S3Bucket',
                                          epilog='Enjoy the program! :)')

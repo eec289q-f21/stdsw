@@ -229,6 +229,12 @@ class EC2InstanceUtility:
             max_retry -= 1
         return response['InstanceStatuses']
 
+    def get_instance_by_id(self,id):
+        return self.get_instances_by_id([id])[0]
+
+    def get_instances_by_id(self,ids):
+        return list(self._ec2res.instances.filter(InstanceIds=ids))
+
     # running vs stopped
     def get_instance_status(self, inst_id, max_retry=5, default=None):
         instances = self.get_instance_statuses([inst_id], max_retry=max_retry)

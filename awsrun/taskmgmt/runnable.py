@@ -8,6 +8,7 @@ import tarfile
 import time
 from abc import ABC, abstractmethod
 from contextlib import closing
+from enum import Enum
 
 import objectfactory
 
@@ -52,6 +53,10 @@ class RunnableTask(ABC):
     @abstractmethod
     def onFinished(self, returncode):
         pass
+
+
+class TaskParameters(Enum):
+    MAX_TIME = 180  # 3 minutes
 
 
 class StdTask(RunnableTask):
@@ -188,7 +193,7 @@ class ProcessRunner(Runner):
             stderr = "Error calling process: " + str(e)
         else:
             try:
-                stdout, stderr = proc.communicate(timeout=self._task.timeout())
+                stdout, stderr = proc.communicate(timeout=min(TaskParameters.MAX_TIME.value,self._task.timeout()))
                 try:
                     self._task.onStdout(stdout)
                 except TerminateTask:

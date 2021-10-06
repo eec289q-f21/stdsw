@@ -105,7 +105,10 @@ class Download(BucketCommand):
             else:
                 completed = True
                 break
-        return self._s3file.ospath
+        if completed:
+            return self._s3file.ospath
+        else:
+            return None
 
 
 class QueueCommand(AWSCommand, ABC):

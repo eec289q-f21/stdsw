@@ -5,7 +5,7 @@ from aws import AWSBackend
 
 
 class SSMHandler:
-    def __init__(self, timeout=30):
+    def __init__(self, timeout=60):
         self._ssm_client: Client = AWSBackend().get_client('ssm')
         self._timeout = timeout
         self._logger = logging.getLogger(SSMHandler.__class__.__name__)
@@ -68,8 +68,10 @@ class SSMHandler:
                 Parameters={'commands': cmd_list},
                 TimeoutSeconds=self._timeout
             )
-            cmd_id = response["Command"]["CommandId"]
-            return cmd_id
+
+            #cmd_id = response["Command"]["CommandId"]
+            #return cmd_id
+            return response
         except ClientError as e:
             self._logger.error("Unable to query SSM for {} : {}".format(inst_id, str(e)))
             if "InvalidInstanceId" in str(e):
@@ -77,3 +79,11 @@ class SSMHandler:
                     "Instance is not in Running state or SSM daemon is not running. This instance is probably still "
                     "starting up ...")
             return None
+
+    @staticmethod
+    def get_cmd_id(response):
+       return response["Command"]["CommandId"]
+
+    @staticmethod
+    def get_instance_ids(response):
+        return response["Command"]["InstanceIds"]

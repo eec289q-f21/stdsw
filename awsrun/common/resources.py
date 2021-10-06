@@ -72,6 +72,10 @@ class File(OSPath):
             print(f.read())
         print(" ====  {0}  ====\n".format(footer))
 
+    @staticmethod
+    def new(p: Path):
+        return File(p.path)
+
 
 class Folder(OSPath):
     def __init__(self, id: str):
@@ -160,7 +164,7 @@ class URL(Path):
 
 class JsonLoader:
     @staticmethod
-    def load_url(urlstr:str):
+    def load_url(urlstr: str):
         url = URL(urlstr)
         if url.isvalid():
             data = url.read()
@@ -169,7 +173,7 @@ class JsonLoader:
             raise RuntimeError("url is invalid")
 
     @staticmethod
-    def load_file(file:str):
+    def load_file(file: str):
         if os.path.exists(file):
             with open(file) as cfg:
                 data = json.load(cfg)

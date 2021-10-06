@@ -39,25 +39,31 @@ class AWSIssuer(Issuer):
         return SendMsg(self._aws_path_manager.server_path, self._aws_path_manager.taskq_path, task).execute()
 
     def _clean_files(self, task: IOTask):
-        os.remove(task.workspace.local_input)
-        os.remove(task.workspace.local_output)
+        if os.path.exists(task.workspace.local_input):
+            os.remove(task.workspace.local_input)
+        if os.path.exists(task.workspace.local_output):
+            os.remove(task.workspace.local_output)
 
     def _output(self, task: IOTask):
         retrieved = Download(self._aws_path_manager.server_path, self._aws_path_manager.bucket_path, task.workspace.output,
                              task.command.timeout).execute()
-        cwd = Folder(os.path.normpath(os.getcwd()))
-        # files to extract
-        stdout_report = File('stdout')
-        stderr_report = File('stderr')
-        target = Decompress(cwd, retrieved, stdout_report, stderr_report).execute()
-        # report
-        target.relative(stdout_report).content(header=" STDOUT ")
-        target.relative(stderr_report).content(header=" STDERR ")
-        #
-        if task.perf_file:
-            Decompress(task.lwd.relative(task.workspace.root).create(), task.workspace.local_input).execute()
-
+        if retrieved:
+            cwd = Folder(os.path.normpath(os.getcwd()))
+            # files to extract
+            stdout_report = File('stdout')
+            stderr_report = File('stderr')
+            target = Decompress(cwd, retrieved, stdout_report, stderr_report).execute()
+            # report
+            File.new(target.relative(stdout_report)).content(header=" STDOUT ")
+            File.new(target.relative(stderr_report)).content(header=" STDERR ")
+            #
+            if task.perf_file:
+                Decompress(task.lwd.relative(task.workspace.root).create(), task.workspace.local_input).execute()
+            print("succeded")
+        else:
+            print("failed to retrieve, re-submit the job!!!")
         self._clean_files(task)
+
 
     @dispatch(IOTask)
     def issue(self, task):
