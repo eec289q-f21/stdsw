@@ -97,8 +97,6 @@ function install_osdev {
         fakeroot
 
 	rm -rf /var/lib/apt/lists
-	
-	npm install -g privnote-cli
 }
 
 if declare -f "$1" > /dev/null
