@@ -347,7 +347,7 @@ class CmdConfig(objectfactory.Serializable):
         cmdconfig._timeout = timeout
         cmdconfig._cores = cores
         cmdconfig._depcfg = depfile
-        return cmdconfig
+        return cmdconfig.normalize()
 
     @property
     def shell(self):
@@ -360,6 +360,13 @@ class CmdConfig(objectfactory.Serializable):
     @property
     def cores(self):
         return self._cores
+
+    def normalize(self):
+        for i in range(len(self.shell)):
+            cmd_arg = self.shell[i]
+            if os.path.exists(cmd_arg) and (not os.path.isabs(cmd_arg)):
+                self.shell[i] = os.path.abspath(cmd_arg)
+        return self
 
     def relativize(self):
         for i in range(len(self.shell)):

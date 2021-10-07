@@ -59,7 +59,7 @@ class AWSIssuer(Issuer):
             #
             if task.perf_file:
                 Decompress(task.lwd.relative(task.workspace.root).create(), task.workspace.local_input).execute()
-            print("succeded")
+            print("Task executed successfully")
         else:
             print("failed to retrieve, re-submit the job!!!")
         self._clean_files(task)
