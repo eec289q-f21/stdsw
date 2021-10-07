@@ -107,7 +107,7 @@ then
 	"$@"
 else
 	if [[ $(lsb_release -rs) == "20.04" ]]; then
-		sudo bash -c "$(declare -f install_dev); install_osdev"
+		sudo bash -c "$(declare -f install_osdev); install_osdev"
 		su $eec_user -c "bash -c install_opencilk"
 		su $eec_user -c "bash -c install_pydev"
 	else
