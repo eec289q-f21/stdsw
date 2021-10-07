@@ -25,7 +25,28 @@ function install_opencilk {
 }
 export -f install_opencilk
 
-function install_dev {
+	
+
+function install_pydev {
+	pip3 install wheel
+	
+	pip3 install boto3
+	
+	pip3 install pyboto
+	
+	pip3 install stdeb==0.9.1
+	
+	pip3 install opentuner==0.8.3
+
+	pip3 install --upgrade awscli
+	
+	pip3 install multipledispatch
+	
+	pip3 install objectfactory==0.0.3
+}
+export -f install_pydev
+
+function install_osdev {
 	if ! [ $(id -u) = 0 ]; then
 	   echo "The script need to be run as root." >&2
 	   exit 1
@@ -77,23 +98,20 @@ function install_dev {
 
 	rm -rf /var/lib/apt/lists
 	
-	pip3 install wheel
-	
-	pip3 install boto3
-	
-	pip3 install pyboto
-	
-	pip3 install stdeb==0.9.1
-	
-	pip3 install opentuner==0.8.3
-	
 	npm install -g privnote-cli
 }
 
-if [[ $(lsb_release -rs) == "20.04" ]]; then
-	sudo bash -c "$(declare -f install_dev); install_dev"
-	su $eec_user -c "bash -c install_opencilk"
+if declare -f "$1" > /dev/null
+then
+	# call the function
+	"$@"
 else
-       echo "Non-compatible version"
-fi
+	if [[ $(lsb_release -rs) == "20.04" ]]; then
+		sudo bash -c "$(declare -f install_dev); install_osdev"
+		su $eec_user -c "bash -c install_opencilk"
+		su $eec_user -c "bash -c install_pydev"
+	else
+	       echo "Non-compatible version"
+	fi
 
+fi
