@@ -43,6 +43,10 @@ function install_pydev {
 	pip3 install multipledispatch
 	
 	pip3 install objectfactory==0.0.3
+
+	pip3 install wrapt
+	
+	pip3 install boto3_type_annotations
 }
 export -f install_pydev
 
