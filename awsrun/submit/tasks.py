@@ -61,6 +61,7 @@ class AWSIssuer(Issuer):
                 lwd_submission = Folder(task.lwd).join(task.workspace.root).create()
                 Decompress(lwd_submission, File(task.workspace.local_input)).execute()
                 Decompress(lwd_submission, retrieved, File(task.perf_file)).execute()
+                Decompress(cwd, retrieved, File(task.perf_file)).execute()
             print("Task executed successfully")
         else:
             print("failed to retrieve, re-submit the job!!!")
