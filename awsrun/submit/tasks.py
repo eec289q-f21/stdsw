@@ -58,7 +58,9 @@ class AWSIssuer(Issuer):
             File.new(target.relative(stderr_report)).content(header=" STDERR ")
             #
             if task.perf_file:
-                Decompress(task.lwd.relative(task.workspace.root).create(), task.workspace.local_input).execute()
+                lwd_submission = Folder(task.lwd).join(task.workspace.root).create()
+                Decompress(lwd_submission, File(task.workspace.local_input)).execute()
+                Decompress(lwd_submission, retrieved, File(task.perf_file)).execute()
             print("Task executed successfully")
         else:
             print("failed to retrieve, re-submit the job!!!")
