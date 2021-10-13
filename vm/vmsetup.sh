@@ -7,7 +7,8 @@ function perf_patch {
 	   echo "The function needs to be run as root." >&2
 	   exit 1
 	fi
-	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=1_Mc--LzyHnUfwVWqfFzTkVzwWya9xH3i' -O perf.tar
+	apt-get install -y slang-gsl libslang2-dev
+	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=19PYlsq82xHDymxD7tBXQlaw4Vx0VUFLE' -O perf.tar
 	tar -pxvf ./perf.tar
 	chmod 755 ./perf
 	mv /usr/bin/perf /usr/bin/perf_old
