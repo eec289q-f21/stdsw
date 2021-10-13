@@ -2,6 +2,22 @@
 eec_user=$(whoami)
 home_dir="$(eval echo ~"$eec_user")"
 
+function perf_patch {
+	if ! [ $(id -u) = 0 ]; then
+	   echo "The function needs to be run as root." >&2
+	   exit 1
+	fi
+	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=1_Mc--LzyHnUfwVWqfFzTkVzwWya9xH3i' -O perf.tar
+	tar -pxvf ./perf.tar
+	chmod 755 ./perf
+	mv /usr/bin/perf /usr/bin/perf_old
+	cp ./perf /usr/bin
+	rm -rf ./perf ./perf.tar
+}
+
+
+export -f perf_patch
+
 function install_opencilk {
         cd $home_dir
         file="./OpenCilk-1.0-LLVM-10.0.1-Ubuntu-20.04-x86_64.tar.gz"
