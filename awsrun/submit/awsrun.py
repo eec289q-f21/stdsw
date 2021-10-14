@@ -2,8 +2,7 @@
 import argparse
 from os import path
 import sys
-
-
+from functools import reduce
 
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
@@ -76,7 +75,6 @@ if __name__ == '__main__':
                             type=CoreRange(1, 8),
                             default=1,
                             help='is this a multicore run')
-
     # workspace config
     aws_parser.add_argument('--prefix',
                             type=str,
@@ -98,8 +96,7 @@ if __name__ == '__main__':
         data = JsonLoader.load_file(args.configfile)
 
     aws_path_manager = AWSPathManager(AWSInfra.load(data))
-
-    cmd_config = CmdConfig.new(cmd=args.cmd,
+    cmd_config = CmdConfig.new(cmd=reduce(list.__add__, map(lambda s: s.split(' '), args.cmd)),
                                timeout=args.timeout,
                                cores=args.core,
                                depfile=args.deps)
