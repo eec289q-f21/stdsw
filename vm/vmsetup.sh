@@ -7,7 +7,8 @@ function perf_patch {
 	   echo "The function needs to be run as root." >&2
 	   exit 1
 	fi
-	apt-get install -y slang-gsl libslang2-dev python-devel systemtap-sdt-dev libperl-dev libbabeltrace-ctf-dev libunwind-dev libelf-dev libdw-dev
+	apt-get update
+	apt-get install -y slang-gsl libslang2-dev python-dev systemtap-sdt-dev libperl-dev libbabeltrace-ctf-dev libunwind-dev libelf-dev libdw-dev
 	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=1K0UW-5E8R2xAVM5Y2tXFwyUOo5SlULzP' -O perf.tar
 	tar -pxvf ./perf.tar
 	chmod 755 ./perf
