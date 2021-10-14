@@ -8,7 +8,7 @@ function perf_patch {
 	   exit 1
 	fi
 	apt-get install -y slang-gsl libslang2-dev
-	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=19PYlsq82xHDymxD7tBXQlaw4Vx0VUFLE' -O perf.tar
+	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=1K0UW-5E8R2xAVM5Y2tXFwyUOo5SlULzP' -O perf.tar
 	tar -pxvf ./perf.tar
 	chmod 755 ./perf
 	mv /usr/bin/perf /usr/bin/perf_old
