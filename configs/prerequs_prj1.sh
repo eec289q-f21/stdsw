@@ -19,7 +19,7 @@ function updates {
 	sudo sh -c 'echo 0 >/proc/sys/kernel/perf_event_paranoid'
 }
 
-export -f update_stdsw
+export -f updates
 
 if declare -f "$1" > /dev/null
 then
