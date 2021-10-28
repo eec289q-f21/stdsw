@@ -34,7 +34,7 @@ class CoreRange:
             raise argparse.ArgumentTypeError(f"Must be an integer <= {self.imax}")
         """
 
-        if value != self.imin or value != self.imax:
+        if not (value == self.imin or value == self.imax):
             raise argparse.ArgumentTypeError("For now we only support {} and {} cores".format(self.imin,self.imax))
 
         return value
@@ -78,7 +78,7 @@ if __name__ == '__main__':
 
     aws_parser.add_argument('--core',
                             type=CoreRange(1, 8),
-                            default=8,
+                            default=1,
                             help='is this a multicore run')
     # workspace config
     aws_parser.add_argument('--prefix',
