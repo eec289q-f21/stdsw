@@ -11,8 +11,8 @@ from boto3_type_annotations.ec2 import Client, ServiceResource, Instance
 
 
 class VPCManager:
-    def __init__(self):
-        self._ec2cli: Client = AWSBackend().get_client(service='ec2')
+    def __init__(self, region='us-west-1'):
+        self._ec2cli: Client = AWSBackend().get_client(service='ec2', region=region)
         self.logger = logging.getLogger(VPCManager.__class__.__name__)
 
     def _name_it(self, resource_id, name):
@@ -24,9 +24,13 @@ class VPCManager:
             }]
         )
 
-    def create_vpc(self, name, cidr_block="10.0.0.0/16"):
+    def set_dedicated(self, vpc_id):
+        self._ec2cli.modify_vpc_tenancy(VpcId=vpc_id, InstanceTenancy='dedicated')
+
+    def create_vpc(self, name, tenancy, cidr_block="10.0.0.0/16"):
         response = self._ec2cli.create_vpc(
-            CidrBlock=cidr_block
+            CidrBlock=cidr_block,
+            InstanceTenancy=tenancy
         )
         vpc_id = response["Vpc"]["VpcId"]
         self._name_it(vpc_id, name)
@@ -81,6 +85,17 @@ class VPCManager:
             SubnetId=subnet_id,
             MapPublicIpOnLaunch={"Value": True}
         )
+
+    def get_all_vpcs(self):
+        return self._ec2cli.describe_vpcs()['Vpcs']
+
+    def get_vpc_id(self, vpcname):
+        _filter = [{'Name': 'tag:Name', 'Values': [vpcname]}]
+        res = self._ec2cli.describe_vpcs(Filters=_filter)
+        if res['Vpcs']:
+            return res['Vpcs'][0]['VpcId']
+        else:
+            return None
 
 
 class IPPermissions:
@@ -159,18 +174,18 @@ class InstanceType:
         return self._cpu
 
 
-class T2Instances:
+class EC2InstTypes:
     @staticmethod
     def nano():
-        return InstanceType("t2.nano", 1, 0.5)
+        return InstanceType("t2.nano", 2, 0.5)
 
     @staticmethod
     def micro():
-        return InstanceType("t2.micro", 1, 1)
+        return InstanceType("t3.micro", 2, 1)
 
     @staticmethod
     def small():
-        return InstanceType("t2.small", 1, 2)
+        return InstanceType("t2.small", 2, 2)
 
     @staticmethod
     def medium():
@@ -186,7 +201,7 @@ class T2Instances:
 
     @staticmethod
     def x2large():
-        return InstanceType("t2.2xlarge", 8, 32)
+        return InstanceType("t3.2xlarge", 8, 32)
 
 
 class InstanceState(Const):
@@ -206,11 +221,10 @@ class InstanceState(Const):
         return state[1]
 
 
-@Singleton
 class EC2InstanceUtility:
-    def __init__(self):
-        self._ec2res: ServiceResource = AWSBackend().get_resource(service='ec2')
-        self._ec2cli: Client = AWSBackend().get_client(service='ec2')
+    def __init__(self, region='us-west-1'):
+        self._ec2res: ServiceResource = AWSBackend().get_resource(service='ec2', region=region)
+        self._ec2cli: Client = AWSBackend().get_client(service='ec2', region=region)
 
     def _get_instance_state(self, inst_id):
         for instance in self._ec2res.instances.all():
@@ -229,10 +243,10 @@ class EC2InstanceUtility:
             max_retry -= 1
         return response['InstanceStatuses']
 
-    def get_instance_by_id(self,id):
+    def get_instance_by_id(self, id):
         return self.get_instances_by_id([id])[0]
 
-    def get_instances_by_id(self,ids):
+    def get_instances_by_id(self, ids):
         return list(self._ec2res.instances.filter(InstanceIds=ids))
 
     # running vs stopped
@@ -275,41 +289,32 @@ class EC2InstanceUtility:
             lambda i: False if i.tags is None else any(
                 map(lambda t: t['Key'] == tag[0] and t['Value'] == tag[1], i.tags)), instances)
 
-    @staticmethod
-    def refresh_instances(instances):
-        EC2InstanceUtility().get_instance_statuses(list(map(lambda i: i.id, instances)))
+    def refresh_instances(self, instances):
+        self.get_instance_statuses(list(map(lambda i: i.id, instances)))
 
-    @staticmethod
-    def _status_check(instance, status):
-        return EC2InstanceUtility().get_instance_status(instance.id) == status
+    def _status_check(self, instance, status):
+        return self.get_instance_status(instance.id) == status
 
-    @staticmethod
-    def is_ready(instance):
-        return EC2InstanceUtility().get_instance_state(instance.id) == 'passed'
+    def is_ready(self, instance):
+        return self.get_instance_state(instance.id) == 'passed'
 
-    @staticmethod
-    def is_terminated(instance):
-        return EC2InstanceUtility._status_check(instance, InstanceState.status(InstanceState.TERMINATED))
+    def is_terminated(self,instance):
+        return self._status_check(instance, InstanceState.status(InstanceState.TERMINATED))
 
-    @staticmethod
-    def is_stopped(instance):
-        return EC2InstanceUtility._status_check(instance, InstanceState.status(InstanceState.STOPPED))
+    def is_stopped(self,instance):
+        return self._status_check(instance, InstanceState.status(InstanceState.STOPPED))
 
-    @staticmethod
-    def is_running(instance):
-        return EC2InstanceUtility._status_check(instance, InstanceState.status(InstanceState.RUNNING))
+    def is_running(self,instance):
+        return self._status_check(instance, InstanceState.status(InstanceState.RUNNING))
 
-    @staticmethod
-    def get_running(instances):
-        return EC2InstanceUtility.filter_instances_by_function(EC2InstanceUtility.is_running, instances)
+    def get_running(self,instances):
+        return EC2InstanceUtility.filter_instances_by_function(self.is_running, instances)
 
-    @staticmethod
-    def get_stopped(instances):
-        return EC2InstanceUtility.filter_instances_by_function(EC2InstanceUtility.is_stopped, instances)
+    def get_stopped(self,instances):
+        return EC2InstanceUtility.filter_instances_by_function(self.is_stopped, instances)
 
-    @staticmethod
-    def get_terminated(instances):
-        return EC2InstanceUtility.filter_instances_by_function(EC2InstanceUtility.is_terminated, instances)
+    def get_terminated(self,instances):
+        return EC2InstanceUtility.filter_instances_by_function(self.is_terminated, instances)
 
     @staticmethod
     def start_instances(instances):
@@ -322,10 +327,9 @@ class EC2InstanceUtility:
             inst.stop()
 
     @staticmethod
-    def terminate_instances(instances):
+    def terminate_instances(self,instances):
         for inst in instances:
-            if not EC2InstanceUtility.is_terminated(inst):
-                inst.terminate()
+            inst.terminate()
 
     @staticmethod
     def wait_for_state(state_cb, instances, max_retry=5, interval=12, success_msg=None):
@@ -343,11 +347,10 @@ class EC2InstanceUtility:
         print("Retries exceeded. Proceeding anyway.")
         return False
 
-    @staticmethod
-    def check_expired(instance, tag_datetime, max_time):
-        if EC2InstanceUtility.is_terminated(instance):
+    def check_expired(self,instance, tag_datetime, max_time):
+        if self.is_terminated(instance):
             return False
-        if EC2InstanceUtility.is_stopped(instance):
+        if self.is_stopped(instance):
             return True
         # launch time
         lt_datetime = instance.launch_time
@@ -362,9 +365,10 @@ class EC2InstanceUtility:
 
 
 class EC2Launcher:
-    def __init__(self, type_tag):
-        self._ec2res: ServiceResource = AWSBackend().get_resource(service='ec2')
-        self._ec2cli: Client = AWSBackend().get_client(service='ec2')
+    def __init__(self, type_tag, region='us-west-1'):
+        self._ec2res: ServiceResource = AWSBackend().get_resource(service='ec2', region=region)
+        self._ec2cli: Client = AWSBackend().get_client(service='ec2', region=region)
+        self._ec2helper = EC2InstanceUtility(region)
         self._type_tag = type_tag
         self._logger = logging.getLogger(EC2Launcher.__class__.__name__)
 
@@ -380,6 +384,7 @@ class EC2Launcher:
             UserData=userdata
         )
 
+        # tag the instances
         for inst in instances:
             self.tag_instance(inst.id, self._type_tag)
 
@@ -428,10 +433,10 @@ class EC2Launcher:
         return EC2InstanceUtility.terminate_instances(self.all_instances())
 
     def refresh_instances(self):
-        return EC2InstanceUtility.refresh_instances(self.all_instances())
+        return self._ec2helper.refresh_instances(self.all_instances())
 
     def get_running_instances(self):
-        return EC2InstanceUtility.get_running(self.all_instances())
+        return self._ec2helper.get_running(self.all_instances())
 
     def get_stopped_instances(self):
-        return EC2InstanceUtility.get_stopped(self.all_instances())
+        return self._ec2helper.get_stopped(self.all_instances())

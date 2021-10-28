@@ -5,8 +5,8 @@ from aws import AWSBackend
 
 
 class SSMHandler:
-    def __init__(self, timeout=60):
-        self._ssm_client: Client = AWSBackend().get_client('ssm')
+    def __init__(self, timeout=60,region='us-west-1'):
+        self._ssm_client: Client = AWSBackend().get_client('ssm',region=region)
         self._timeout = timeout
         self._logger = logging.getLogger(SSMHandler.__class__.__name__)
 

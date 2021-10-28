@@ -339,14 +339,16 @@ class CmdConfig(objectfactory.Serializable):
     _timeout = objectfactory.Field()
     _cores = objectfactory.Field()
     _depcfg = objectfactory.Field()
+    _envcfg = objectfactory.Field()
 
     @staticmethod
-    def new(cmd, timeout, cores, depfile):
+    def new(cmd, timeout, cores, depfile, env):
         cmdconfig = CmdConfig()
         cmdconfig._command = cmd
         cmdconfig._timeout = timeout
         cmdconfig._cores = cores
         cmdconfig._depcfg = depfile
+        cmdconfig._envcfg = env
         return cmdconfig.normalize()
 
     @property
@@ -360,6 +362,10 @@ class CmdConfig(objectfactory.Serializable):
     @property
     def cores(self):
         return self._cores
+
+    @property
+    def env_vars(self):
+        return self._envcfg
 
     def normalize(self):
         for i in range(len(self.shell)):

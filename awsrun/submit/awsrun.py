@@ -81,6 +81,11 @@ if __name__ == '__main__':
                             default="submission",
                             help='prefix for job folders')
 
+    aws_parser.add_argument('--env',
+                            type=str,
+                            default="",
+                            help='environment variables')
+
     # task config
     aws_parser.add_argument('--cmd',
                             nargs='+',
@@ -99,7 +104,8 @@ if __name__ == '__main__':
     cmd_config = CmdConfig.new(cmd=reduce(list.__add__, map(lambda s: s.split(' '), args.cmd)),
                                timeout=args.timeout,
                                cores=args.core,
-                               depfile=args.deps)
+                               depfile=args.deps,
+                               env=reduce(list.__add__, map(lambda e: e.split(';'), args.env), []))
 
     ws_config = WSConfig.new(args.prefix)
 
