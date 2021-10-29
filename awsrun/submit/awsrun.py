@@ -110,7 +110,7 @@ if __name__ == '__main__':
                                timeout=args.timeout,
                                cores=args.core,
                                depfile=args.deps,
-                               env=reduce(list.__add__, map(lambda e: e.split(';'), args.env), []))
+                               env=args.env.split(';'))
 
     ws_config = WSConfig.new(args.prefix)
 
